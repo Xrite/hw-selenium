@@ -2,6 +2,7 @@ import org.openqa.selenium.By
 import org.openqa.selenium.NoSuchElementException
 import org.openqa.selenium.WebDriver
 import org.openqa.selenium.firefox.FirefoxDriver
+import org.openqa.selenium.interactions.Actions
 import org.openqa.selenium.support.ui.ExpectedConditions
 import org.openqa.selenium.support.ui.WebDriverWait
 
@@ -127,7 +128,7 @@ class CreateUserForm(val driver: WebDriver) {
         wait.until(ExpectedConditions.or(
             ExpectedConditions.visibilityOfAllElementsLocatedBy(error),
             ExpectedConditions.urlContains("editUser"),
-            ExpectedConditions.visibilityOfElementLocated(By.className("error-bulb2"))
+            ExpectedConditions.elementToBeClickable(By.className("error-bulb2"))
         ))
         return try {
             val ret = driver.findElement(error).text
@@ -139,10 +140,12 @@ class CreateUserForm(val driver: WebDriver) {
             ret
         } catch (e: NoSuchElementException) {
             try {
-                driver.findElement(By.className("error-bulb2"))
+                val elem = driver.findElement(By.className("error-bulb2"))
+                Actions(driver).moveToElement(elem).build().perform()
+                val ret = driver.findElement(By.className("error-tooltip")).text
                 wait.until(ExpectedConditions.elementToBeClickable(cancellButton))
                 driver.findElement(cancellButton).click()
-                "Empty"
+                ret
             } catch (e: NoSuchElementException) {
                 UserPage(driver).goToUsersPage()
                 ""
